@@ -48,3 +48,10 @@ To use this script, follow these steps:
 ```
 python main2.py
 ```
+
+Enter the name of the company for which you want to download and upload 10-K filings.
+Select the correct company from the suggestions provided.
+Choose the year for which you want to download and upload 10-K filings.
+Click the "Download and Upload 10-K filings" button.
+
+The script will download the 10-K filings for the specified company and year from the SEC Edgar database, clean the files, and upload them to a MinIO object storage service. It will display the download link for the cleaned files if the process is successful.
