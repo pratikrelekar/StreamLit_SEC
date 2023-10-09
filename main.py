@@ -11,8 +11,8 @@ from bs4 import BeautifulSoup
 
 # MinIO configurations
 MINIO_ENDPOINT = 's3.dsrs.illinois.edu'
-MINIO_ACCESS_KEY = 'Ll667pzVdQaxgp9a4OLW'
-MINIO_SECRET_KEY = 'i7Tk2RRwhhnfZMI0Ug6wvpQ6X2rBsJRBhlCQy23L'
+MINIO_ACCESS_KEY = 'ENTER ACCESS KEY'
+MINIO_SECRET_KEY = 'ENTER SECRET KEY'
 MINIO_BUCKET_NAME = '10-k'
 MINIO_SECURE = True
 
