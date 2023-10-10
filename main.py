@@ -44,6 +44,10 @@ def get_matching_companies(name):
     potential_matches = company_index.get(prefix, [])
     return [match[0] for match in process.extract(name, potential_matches, limit=5)]
 
+def is_cik(input_str):
+    """Check if the given input is a CIK (all numeric and typically 10 digits)."""
+    return input_str.isdigit() and len(input_str) == 10
+
 def move_and_merge(src, dest):
     if not os.path.exists(dest):
         os.rename(src, dest)
@@ -81,54 +85,66 @@ def clean_file_with_soup(filepath):
 def download_and_upload_10k_files(company_name, year):
     try:
         cik = edgar_obj.get_cik_by_company_name(company_name)
+
         edgar_download.get("10-K", cik, after=f"{year}-01-01", before=f"{year}-12-31")
 
         src_folder = os.path.join("sec-edgar-filings", cik)
         dest_folder = os.path.join("sec-edgar-filings", company_name.replace(" ", "_"))
 
-        # Check if the source folder exists
         if not os.path.exists(src_folder):
             return f"No 10-K filings were downloaded for {company_name} in {year}.", None
 
         move_and_merge(src_folder, dest_folder)
-
+        
         # Clean and upload files to Minio
         for root, _, files in os.walk(dest_folder):
             for file in files:
                 file_path = os.path.join(root, file)
                 cleaned_content = clean_file_with_soup(file_path)
+
                 with open(file_path, 'w', encoding='utf-8') as cleaned_file:
                     cleaned_file.write(cleaned_content)
-                minio_path = os.path.join("10-k", company_name.replace(" ", "_"), str(year), file)
-                minio_client.fput_object(MINIO_BUCKET_NAME, minio_path, file_path)
 
-        return f"Downloaded and uploaded 10-K filings for {company_name} in {year}.", minio_path
+                minio_path = os.path.join("10-k", company_name.replace(" ", "_"), str(year), f"{cik}_{year}_{file}")
+                minio_client.fput_object(MINIO_BUCKET_NAME, minio_path, file_path)
+                
+                # Generate a presigned URL for the uploaded file
+                url = minio_client.presigned_get_object(MINIO_BUCKET_NAME, minio_path)
+
+        return f"Downloaded and uploaded 10-K filings for {company_name} in {year}.", url
     except Exception as e:
         return f"Error: {str(e)}", None
 
 # Streamlit App
 st.title('SEC 10-K Filings Downloader & Uploader to MinIO')
 
-input_name = st.text_input("Enter the company name:")
+input_data = st.text_input("Enter the company name or CIK:")
 
-if input_name:
-    matches = get_matching_companies(input_name)
-
-    if matches:
-        matches_with_cik = [f"{match} ({edgar_obj.get_cik_by_company_name(match)})" for match in matches]
-        selected = st.selectbox('Select the correct company:', matches_with_cik)
-        selected_company = selected.split(" (")[0]
-        selected_year = st.selectbox('Select the year:', list(range(1993, 2023)))
-
-        if st.button('Download and Upload 10-K filings'):
-            with concurrent.futures.ThreadPoolExecutor() as executor:
-                future = executor.submit(download_and_upload_10k_files, selected_company, selected_year)
-                result, minio_path = future.result()
-                st.write(result)
-
-                # If there's a valid MinIO path, display the download link
-                if minio_path:
-                    download_link = f"https://{MINIO_ENDPOINT}/{MINIO_BUCKET_NAME}/{minio_path}"
-                    st.write(f"[Download the cleaned file here.]({download_link})")
+if input_data:
+    if is_cik(input_data):
+        # If input is CIK, then use it directly
+        cik = input_data
+        company_name = edgar_obj.get_company_name_by_cik(cik)
+        if not company_name:
+            st.write("Invalid CIK provided.")
     else:
-        st.write("No matching companies found.")
+        matches = get_matching_companies(input_data)
+        if matches:
+            matches_with_cik = [f"{match} ({edgar_obj.get_cik_by_company_name(match)})" for match in matches]
+            selected = st.selectbox('Select the correct company:', matches_with_cik)
+            company_name = selected.split(" (")[0]
+            cik = edgar_obj.get_cik_by_company_name(company_name)
+        else:
+            st.write("No matching companies found.")
+
+    selected_year = st.selectbox('Select the year:', list(range(1993, 2023)))
+
+    if st.button('Download and Upload 10-K filings'):
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            future = executor.submit(download_and_upload_10k_files, company_name, selected_year)
+            result, url = future.result()
+            st.write(result)
+
+            # If there's a valid URL, display the download link
+            if url:
+                st.write(f"[Download the cleaned file here.]({url})")
