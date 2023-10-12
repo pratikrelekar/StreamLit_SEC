@@ -122,7 +122,7 @@ if input_data:
 
     selected_year = st.selectbox('Select the year:', list(range(1993, 2023)))
 
-    if st.button('Download and Upload 10-K filings'):
+    if st.button('Download 10-K filings'):
         with st.spinner('Processing... Downloading from SEC, cleaning, and uploading. Please wait...'):
             with concurrent.futures.ThreadPoolExecutor() as executor:
                 future = executor.submit(download_and_upload_10k_files, company_name, selected_year)
