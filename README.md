@@ -20,25 +20,8 @@ cd SEC-10K-Filings
 ```
 
 ## Install the required Python libraries using pip:
-### Streamlit:
 ```
-pip install streamlit
-```
-### sec-edgar-downloader:
-```
-pip install sec-edgar-downloader
-```
-### fuzzywuzzy:
-```
-pip install fuzzywuzzy
-```
-### edgar:
-```
-pip install edgar
-```
-### MinIO:
-```
-pip install minio
+pip -r requirements.txt
 ```
 
 ## 2. Usage
@@ -46,7 +29,7 @@ pip install minio
 To use this script, follow these steps:
 ### Run the script using Python:
 ```
-python main2.py
+python main.py
 ```
 
 Enter the name of the company for which you want to download and upload 10-K filings.

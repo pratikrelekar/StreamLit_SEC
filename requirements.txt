@@ -1,0 +1,7 @@
+streamlit
+sec-edgar-downloader
+python-dotenv
+fuzzywuzzy
+edgar
+beautifulsoup4
+minio
