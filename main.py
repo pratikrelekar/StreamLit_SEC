@@ -11,6 +11,8 @@ from bs4 import BeautifulSoup
 from dotenv import load_dotenv
 import re
 
+load_dotenv()
+
 # MinIO configurations
 MINIO_ENDPOINT = 's3.dsrs.illinois.edu'
 MINIO_ACCESS_KEY = os.getenv('MINIO_ACCESS_KEY') 
