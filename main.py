@@ -8,12 +8,13 @@ import concurrent.futures
 from minio import Minio
 import shutil
 from bs4 import BeautifulSoup
+from dotenv import load_dotenv
 import re
 
 # MinIO configurations
 MINIO_ENDPOINT = 's3.dsrs.illinois.edu'
-MINIO_ACCESS_KEY = 'Ll667pzVdQaxgp9a4OLW'
-MINIO_SECRET_KEY = 'i7Tk2RRwhhnfZMI0Ug6wvpQ6X2rBsJRBhlCQy23L'
+MINIO_ACCESS_KEY = os.getenv('MINIO_ACCESS_KEY') 
+MINIO_SECRET_KEY = os.getenv('MINIO_SECRET_KEY')
 MINIO_BUCKET_NAME = '10-k'
 MINIO_SECURE = True
 

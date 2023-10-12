@@ -1,0 +1,4 @@
+[server]
+baseUrlPath = "apps/sec10k"
+[theme]
+backgroundColor="white"
