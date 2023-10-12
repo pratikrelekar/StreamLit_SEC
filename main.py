@@ -99,7 +99,7 @@ def download_and_upload_10k_files(company_name, year):
         return f"Error: {str(e)}", None
 
 # Streamlit App
-st.title('SEC 10-K Filings Downloader & Uploader to MinIO')
+st.title('SEC 10-K Filings')
 
 input_data = st.text_input("Enter the company name or CIK:")
 
